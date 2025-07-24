@@ -15,6 +15,7 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      overflow: hidden;
     }
 
     .container {
@@ -26,6 +27,8 @@
       width: 90%;
       text-align: center;
       animation: fadeIn 1s ease-in-out;
+      position: relative;
+      z-index: 1;
     }
 
     @keyframes fadeIn {
@@ -101,6 +104,24 @@
       color: #1e3a8a;
       margin-bottom: 10px;
     }
+
+    .particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: gold;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      animation: explode 700ms ease-out forwards;
+    }
+
+    @keyframes explode {
+      to {
+        transform: translate(var(--x), var(--y));
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -158,7 +179,7 @@
         timerDisplay.textContent = "Time left: " + timeLeft + "s";
         if (timeLeft <= 0) {
           clearInterval(timer);
-          handleAnswer(null); // No answer selected in time
+          handleAnswer(null);
         }
       }, 1000);
     }
@@ -171,6 +192,7 @@
     function handleAnswer(response) {
       enableButtons(false);
       const correctAnswer = questions[current].a;
+
       setTimeout(() => {
         if (response === correctAnswer) {
           feedback.textContent = "Correct!";
@@ -183,6 +205,7 @@
           feedback.textContent = "Incorrect!";
           feedback.style.color = "red";
         }
+        triggerParticles();
 
         setTimeout(() => {
           current++;
@@ -194,7 +217,7 @@
             scoreDisplay.textContent = `You got ${correct} out of ${questions.length} questions right.`;
           }
         }, 1000);
-      }, 1000);
+      }, 500);
     }
 
     function enableButtons(enable) {
@@ -208,6 +231,17 @@
       resultBox.classList.add("hidden");
       quizBox.classList.remove("hidden");
       showQuestion();
+    }
+
+    function triggerParticles() {
+      for (let i = 0; i < 25; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.setProperty('--x', `${(Math.random() - 0.5) * 300}px`);
+        particle.style.setProperty('--y', `${(Math.random() - 0.5) * 300}px`);
+        document.body.appendChild(particle);
+        setTimeout(() => particle.remove(), 700);
+      }
     }
 
     showQuestion();
