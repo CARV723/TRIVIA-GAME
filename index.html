@@ -2,45 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Haircut Trivia</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #3b82f6;
       margin: 0;
-      padding: 0;
+      background-color: #3b82f6;
+      font-family: 'Segoe UI', sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      overflow: hidden;
     }
     .container {
-      background-color: white;
+      background: white;
       padding: 40px;
       border-radius: 15px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-      max-width: 600px;
-      width: 90%;
       text-align: center;
-      animation: fadeIn 1s ease-in-out;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      width: 90%;
+      max-width: 600px;
       position: relative;
       z-index: 1;
     }
-    @keyframes fadeIn {
-      0% { opacity: 0; transform: scale(0.95); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-    h1 {
-      margin-bottom: 20px;
-      color: #1e40af;
-    }
-    .question {
-      font-size: 20px;
-      margin-bottom: 20px;
-      color: #111827;
-    }
+    h1 { color: #1e3a8a; }
+    .question { font-size: 20px; margin: 20px 0; }
     button {
       font-size: 18px;
       padding: 12px 32px;
@@ -48,41 +34,24 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s ease;
+      transition: transform 0.2s;
     }
-    .yes {
-      background-color: #10b981;
-      color: white;
-    }
-    .no {
-      background-color: #ef4444;
-      color: white;
-    }
-    .yes:hover { background-color: #059669; transform: scale(1.05); }
-    .no:hover { background-color: #dc2626; transform: scale(1.05); }
-
-    .feedback {
-      font-weight: bold;
-      margin-top: 10px;
-      font-size: 18px;
-      height: 24px;
-    }
-    .hidden { display: none; }
-
+    .yes { background: #10b981; color: white; }
+    .no { background: #ef4444; color: white; }
+    .yes:hover { background: #059669; transform: scale(1.05); }
+    .no:hover { background: #dc2626; transform: scale(1.05); }
+    .feedback { height: 24px; font-weight: bold; margin-top: 10px; }
+    #timer { font-size: 18px; color: #1e3a8a; margin-bottom: 10px; }
     #restart {
       margin-top: 20px;
-      background-color: #2563eb;
+      background: #2563eb;
       color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
     }
-    #restart:hover {
-      background-color: #1d4ed8;
-      transform: scale(1.05);
-    }
-    #timer {
-      font-size: 18px;
-      color: #1e3a8a;
-      margin-bottom: 10px;
-    }
+    .hidden { display: none; }
 
     .particle {
       position: absolute;
@@ -94,7 +63,6 @@
       z-index: 0;
       animation: explode 700ms ease-out forwards;
     }
-
     @keyframes explode {
       to {
         transform: translate(var(--x), var(--y));
@@ -119,7 +87,9 @@
     <button id="restart" onclick="restartGame()">Play Again</button>
   </div>
 
+  <!-- 🎵 Sonidos -->
   <audio id="pop-sound" src="pop.mp3" preload="auto"></audio>
+  <audio id="bg-music" src="bg-music.mp3" preload="auto" loop></audio>
 
   <script>
     const questions = [
@@ -149,6 +119,7 @@
     const yesBtn = document.getElementById("yes-btn");
     const noBtn = document.getElementById("no-btn");
     const popSound = document.getElementById("pop-sound");
+    const bgMusic = document.getElementById("bg-music");
 
     function showQuestion() {
       feedback.textContent = "";
@@ -167,9 +138,15 @@
     }
 
     function answer(response) {
+      if (popSound) {
+        popSound.currentTime = 0;
+        popSound.play();
+      }
       clearInterval(timer);
-      popSound.currentTime = 0;
-      popSound.play();
+      if (bgMusic && bgMusic.paused) {
+        bgMusic.volume = 0.3;
+        bgMusic.play().catch(() => {});
+      }
       handleAnswer(response);
     }
 
@@ -196,10 +173,10 @@
           } else {
             quizBox.classList.add("hidden");
             resultBox.classList.remove("hidden");
-            scoreDisplay.textContent = `You got ${correct} out of ${questions.length} questions right.`;
+            scoreDisplay.textContent = `You got ${correct} out of ${questions.length} right.`;
           }
         }, 1000);
-      }, 500);
+      }, 200); // ahora feedback aparece más rápido
     }
 
     function enableButtons(enable) {
