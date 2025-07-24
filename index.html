@@ -17,17 +17,25 @@
       background: rgba(255, 255, 255, 0.1);
       padding: 20px;
       border-radius: 12px;
-      max-width: 500px;
+      max-width: 600px;
       margin: 20px auto;
       box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
     }
 
+    h1 {
+      font-size: 32px;
+    }
+
+    h2 {
+      font-size: 24px;
+    }
+
     button {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin: 10px;
+      padding: 14px 24px;
+      font-size: 20px;
+      margin: 12px;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
       transition: transform 0.2s;
     }
@@ -51,16 +59,22 @@
     }
 
     #feedback {
-      font-size: 18px;
-      margin-top: 10px;
-      height: 24px;
+      font-size: 22px;
+      margin-top: 15px;
+      height: 28px;
       transition: opacity 0.2s ease;
     }
 
     #score {
       margin-top: 20px;
-      font-size: 20px;
+      font-size: 24px;
       font-weight: bold;
+    }
+
+    #timer {
+      font-size: 22px;
+      margin-bottom: 10px;
+      color: #ffffaa;
     }
   </style>
 </head>
@@ -73,6 +87,7 @@
   </div>
 
   <div id="quizBox" class="hidden">
+    <div id="timer">Time left: 10</div>
     <h2 id="question"></h2>
     <button class="yes" onclick="handleAnswer('Yes')">Yes</button>
     <button class="no" onclick="handleAnswer('No')">No</button>
@@ -96,23 +111,23 @@
 
     let currentQuestion = 0;
     let correct = 0;
+    let timerInterval;
+    let timeLeft = 10;
+    let allowClick = true;
 
     const questionEl = document.getElementById("question");
     const feedback = document.getElementById("feedback");
     const score = document.getElementById("score");
+    const timerEl = document.getElementById("timer");
 
     const quizBox = document.getElementById("quizBox");
     const soundBox = document.getElementById("soundBox");
     const enableSoundBtn = document.getElementById("enable-sound-btn");
 
-    // Sonidos
     const popCorrect = new Audio("correct.mp3");
     const popIncorrect = new Audio("incorrect.mp3");
 
     enableSoundBtn.addEventListener("click", () => {
-      // Activar audio en móviles
-      popCorrect.play().catch(() => {});
-      popIncorrect.play().catch(() => {});
       soundBox.classList.add("hidden");
       quizBox.classList.remove("hidden");
       loadQuestion();
@@ -120,36 +135,58 @@
 
     function loadQuestion() {
       if (currentQuestion < questions.length) {
+        allowClick = true;
+        timeLeft = 10;
         questionEl.textContent = questions[currentQuestion].question;
         feedback.textContent = "";
+        updateTimer();
+        timerInterval = setInterval(() => {
+          timeLeft--;
+          updateTimer();
+          if (timeLeft === 0) {
+            clearInterval(timerInterval);
+            handleAnswer("Time's up");
+          }
+        }, 1000);
       } else {
         questionEl.textContent = "Thanks for playing!";
         document.querySelector(".yes").style.display = "none";
         document.querySelector(".no").style.display = "none";
+        timerEl.style.display = "none";
         score.textContent = `Final Score: ${correct}/${questions.length}`;
       }
     }
 
+    function updateTimer() {
+      timerEl.textContent = `Time left: ${timeLeft}`;
+    }
+
     function handleAnswer(response) {
+      if (!allowClick) return;
+      allowClick = false;
+      clearInterval(timerInterval);
+
       const correctAnswer = questions[currentQuestion].answer;
 
-      if (response === correctAnswer) {
-        feedback.textContent = "Correct!";
-        feedback.style.color = "lightgreen";
-        correct++;
-        popCorrect.currentTime = 0;
-        popCorrect.play().catch(() => {});
-      } else {
-        feedback.textContent = "Incorrect!";
-        feedback.style.color = "#ffaaaa";
-        popIncorrect.currentTime = 0;
-        popIncorrect.play().catch(() => {});
-      }
-
       setTimeout(() => {
-        currentQuestion++;
-        loadQuestion();
-      }, 800);
+        if (response === correctAnswer) {
+          feedback.textContent = "Correct!";
+          feedback.style.color = "lightgreen";
+          correct++;
+          popCorrect.currentTime = 0;
+          popCorrect.play().catch(() => {});
+        } else {
+          feedback.textContent = "Incorrect!";
+          feedback.style.color = "#ffaaaa";
+          popIncorrect.currentTime = 0;
+          popIncorrect.play().catch(() => {});
+        }
+
+        setTimeout(() => {
+          currentQuestion++;
+          loadQuestion();
+        }, 800);
+      }, 500); // Retraso para mostrar feedback luego de 0.5s
     }
   </script>
 </body>
