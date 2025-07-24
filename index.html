@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,7 +16,6 @@
       min-height: 100vh;
       overflow: hidden;
     }
-
     .container {
       background-color: white;
       padding: 40px;
@@ -30,23 +28,19 @@
       position: relative;
       z-index: 1;
     }
-
     @keyframes fadeIn {
       0% { opacity: 0; transform: scale(0.95); }
       100% { opacity: 1; transform: scale(1); }
     }
-
     h1 {
       margin-bottom: 20px;
       color: #1e40af;
     }
-
     .question {
       font-size: 20px;
       margin-bottom: 20px;
       color: #111827;
     }
-
     button {
       font-size: 18px;
       padding: 12px 32px;
@@ -56,26 +50,16 @@
       cursor: pointer;
       transition: background-color 0.3s ease, transform 0.2s ease;
     }
-
     .yes {
       background-color: #10b981;
       color: white;
     }
-
     .no {
       background-color: #ef4444;
       color: white;
     }
-
-    .yes:hover {
-      background-color: #059669;
-      transform: scale(1.05);
-    }
-
-    .no:hover {
-      background-color: #dc2626;
-      transform: scale(1.05);
-    }
+    .yes:hover { background-color: #059669; transform: scale(1.05); }
+    .no:hover { background-color: #dc2626; transform: scale(1.05); }
 
     .feedback {
       font-weight: bold;
@@ -83,22 +67,17 @@
       font-size: 18px;
       height: 24px;
     }
-
-    .hidden {
-      display: none;
-    }
+    .hidden { display: none; }
 
     #restart {
       margin-top: 20px;
       background-color: #2563eb;
       color: white;
     }
-
     #restart:hover {
       background-color: #1d4ed8;
       transform: scale(1.05);
     }
-
     #timer {
       font-size: 18px;
       color: #1e3a8a;
@@ -107,8 +86,8 @@
 
     .particle {
       position: absolute;
-      width: 6px;
-      height: 6px;
+      width: 8px;
+      height: 8px;
       background: gold;
       border-radius: 50%;
       pointer-events: none;
@@ -140,6 +119,8 @@
     <button id="restart" onclick="restartGame()">Play Again</button>
   </div>
 
+  <audio id="pop-sound" src="pop.mp3" preload="auto"></audio>
+
   <script>
     const questions = [
       { q: "Was it time for a haircut?", a: "Yes" },
@@ -167,6 +148,7 @@
     const scoreDisplay = document.getElementById("score");
     const yesBtn = document.getElementById("yes-btn");
     const noBtn = document.getElementById("no-btn");
+    const popSound = document.getElementById("pop-sound");
 
     function showQuestion() {
       feedback.textContent = "";
@@ -186,13 +168,14 @@
 
     function answer(response) {
       clearInterval(timer);
+      popSound.currentTime = 0;
+      popSound.play();
       handleAnswer(response);
     }
 
     function handleAnswer(response) {
       enableButtons(false);
       const correctAnswer = questions[current].a;
-
       setTimeout(() => {
         if (response === correctAnswer) {
           feedback.textContent = "Correct!";
@@ -206,7 +189,6 @@
           feedback.style.color = "red";
         }
         triggerParticles();
-
         setTimeout(() => {
           current++;
           if (current < questions.length) {
