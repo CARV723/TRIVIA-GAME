@@ -2,208 +2,155 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Haircut Trivia</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
-      margin: 0;
-      background-color: #3b82f6;
-      font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-    .container {
-      background: white;
-      padding: 40px;
-      border-radius: 15px;
+      font-family: Arial, sans-serif;
+      background-color: #0077cc;
+      color: white;
       text-align: center;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-      width: 90%;
-      max-width: 600px;
-      position: relative;
-      z-index: 1;
+      padding: 20px;
     }
-    h1 { color: #1e3a8a; }
-    .question { font-size: 20px; margin: 20px 0; }
+
+    #quizBox, #soundBox {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 500px;
+      margin: 20px auto;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+    }
+
     button {
-      font-size: 18px;
-      padding: 12px 32px;
+      padding: 10px 20px;
+      font-size: 16px;
       margin: 10px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
       transition: transform 0.2s;
     }
-    .yes { background: #10b981; color: white; }
-    .no { background: #ef4444; color: white; }
-    .yes:hover { background: #059669; transform: scale(1.05); }
-    .no:hover { background: #dc2626; transform: scale(1.05); }
-    .feedback { height: 24px; font-weight: bold; margin-top: 10px; }
-    #timer { font-size: 18px; color: #1e3a8a; margin-bottom: 10px; }
-    #restart {
-      margin-top: 20px;
-      background: #2563eb;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-    }
-    .hidden { display: none; }
 
-    .particle {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      background: gold;
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 0;
-      animation: explode 700ms ease-out forwards;
+    button:hover {
+      transform: scale(1.05);
     }
-    @keyframes explode {
-      to {
-        transform: translate(var(--x), var(--y));
-        opacity: 0;
-      }
+
+    .yes {
+      background-color: #4caf50;
+      color: white;
+    }
+
+    .no {
+      background-color: #f44336;
+      color: white;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #feedback {
+      font-size: 18px;
+      margin-top: 10px;
+      height: 24px;
+      transition: opacity 0.2s ease;
+    }
+
+    #score {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <div class="container" id="quiz">
-    <h1>Haircut Trivia</h1>
-    <p id="timer">Time left: 10s</p>
-    <p class="question" id="question-text"></p>
-    <button class="yes" id="yes-btn" onclick="answer('Yes')">Yes</button>
-    <button class="no" id="no-btn" onclick="answer('No')">No</button>
-    <p class="feedback" id="feedback"></p>
+  <h1>Haircut Trivia</h1>
+
+  <!-- Botón para activar sonido -->
+  <div id="soundBox">
+    <button id="enable-sound-btn">🔊 Enable Sound</button>
   </div>
 
-  <div class="container hidden" id="result">
-    <h2>Thanks for playing!</h2>
-    <p id="score"></p>
-    <button id="restart" onclick="restartGame()">Play Again</button>
+  <div id="quizBox" class="hidden">
+    <h2 id="question"></h2>
+    <button class="yes" onclick="handleAnswer('Yes')">Yes</button>
+    <button class="no" onclick="handleAnswer('No')">No</button>
+    <div id="feedback"></div>
+    <div id="score"></div>
   </div>
-
-  <!-- 🎵 Sonidos -->
-  <audio id="pop-sound" src="pop.mp3" preload="auto"></audio>
-  <audio id="bg-music" src="bg-music.mp3" preload="auto" loop></audio>
 
   <script>
     const questions = [
-      { q: "Was it time for a haircut?", a: "Yes" },
-      { q: "Did he have to look in the mirror?", a: "No" },
-      { q: "Was he going bald?", a: "Yes" },
-      { q: "Did he need to cut his hair every week?", a: "No" },
-      { q: "Was a 'tongue' of hair on the back of his head?", a: "No" },
-      { q: "Was his hair thinning at the crown?", a: "Yes" },
-      { q: "Did he still have plenty of hair on the sides and back?", a: "Yes" },
-      { q: "Did he ever let his hair grow for more than two weeks?", a: "No" },
-      { q: "Did his hair look worse the longer it got?", a: "Yes" },
-      { q: "Did he spread a magazine over the bathroom sink?", a: "No" }
+      { question: "Was it time for a haircut?", answer: "Yes" },
+      { question: "Did he have to look in the mirror?", answer: "No" },
+      { question: "Was he going bald?", answer: "Yes" },
+      { question: "Did he need to cut his hair every week?", answer: "No" },
+      { question: "Was a 'tongue' of hair on the back of his head?", answer: "No" },
+      { question: "Was his hair thinning at the crown?", answer: "Yes" },
+      { question: "Did he still have plenty of hair on the sides and back?", answer: "Yes" },
+      { question: "Did he ever let his hair grow for more than two weeks?", answer: "No" },
+      { question: "Did his hair look worse the longer it got?", answer: "Yes" },
+      { question: "Did he spread a magazine over the bathroom sink?", answer: "No" }
     ];
 
-    let current = 0;
+    let currentQuestion = 0;
     let correct = 0;
-    let timer;
-    let timeLeft = 10;
 
-    const questionText = document.getElementById("question-text");
+    const questionEl = document.getElementById("question");
     const feedback = document.getElementById("feedback");
-    const timerDisplay = document.getElementById("timer");
-    const quizBox = document.getElementById("quiz");
-    const resultBox = document.getElementById("result");
-    const scoreDisplay = document.getElementById("score");
-    const yesBtn = document.getElementById("yes-btn");
-    const noBtn = document.getElementById("no-btn");
-    const popSound = document.getElementById("pop-sound");
-    const bgMusic = document.getElementById("bg-music");
+    const score = document.getElementById("score");
 
-    function showQuestion() {
-      feedback.textContent = "";
-      enableButtons(true);
-      timeLeft = 10;
-      timerDisplay.textContent = "Time left: " + timeLeft + "s";
-      questionText.textContent = questions[current].q;
-      timer = setInterval(() => {
-        timeLeft--;
-        timerDisplay.textContent = "Time left: " + timeLeft + "s";
-        if (timeLeft <= 0) {
-          clearInterval(timer);
-          handleAnswer(null);
-        }
-      }, 1000);
-    }
+    const quizBox = document.getElementById("quizBox");
+    const soundBox = document.getElementById("soundBox");
+    const enableSoundBtn = document.getElementById("enable-sound-btn");
 
-    function answer(response) {
-      if (popSound) {
-        popSound.currentTime = 0;
-        popSound.play();
+    // Sonidos
+    const popCorrect = new Audio("correct.mp3");
+    const popIncorrect = new Audio("incorrect.mp3");
+
+    enableSoundBtn.addEventListener("click", () => {
+      // Activar audio en móviles
+      popCorrect.play().catch(() => {});
+      popIncorrect.play().catch(() => {});
+      soundBox.classList.add("hidden");
+      quizBox.classList.remove("hidden");
+      loadQuestion();
+    });
+
+    function loadQuestion() {
+      if (currentQuestion < questions.length) {
+        questionEl.textContent = questions[currentQuestion].question;
+        feedback.textContent = "";
+      } else {
+        questionEl.textContent = "Thanks for playing!";
+        document.querySelector(".yes").style.display = "none";
+        document.querySelector(".no").style.display = "none";
+        score.textContent = `Final Score: ${correct}/${questions.length}`;
       }
-      clearInterval(timer);
-      if (bgMusic && bgMusic.paused) {
-        bgMusic.volume = 0.3;
-        bgMusic.play().catch(() => {});
-      }
-      handleAnswer(response);
     }
 
     function handleAnswer(response) {
-      enableButtons(false);
-      const correctAnswer = questions[current].a;
-      setTimeout(() => {
-        if (response === correctAnswer) {
-          feedback.textContent = "Correct!";
-          feedback.style.color = "green";
-          correct++;
-        } else if (response === null) {
-          feedback.textContent = "Time's up!";
-          feedback.style.color = "orange";
-        } else {
-          feedback.textContent = "Incorrect!";
-          feedback.style.color = "red";
-        }
-        triggerParticles();
-        setTimeout(() => {
-          current++;
-          if (current < questions.length) {
-            showQuestion();
-          } else {
-            quizBox.classList.add("hidden");
-            resultBox.classList.remove("hidden");
-            scoreDisplay.textContent = `You got ${correct} out of ${questions.length} right.`;
-          }
-        }, 1000);
-      }, 200); // ahora feedback aparece más rápido
-    }
+      const correctAnswer = questions[currentQuestion].answer;
 
-    function enableButtons(enable) {
-      yesBtn.disabled = !enable;
-      noBtn.disabled = !enable;
-    }
-
-    function restartGame() {
-      current = 0;
-      correct = 0;
-      resultBox.classList.add("hidden");
-      quizBox.classList.remove("hidden");
-      showQuestion();
-    }
-
-    function triggerParticles() {
-      for (let i = 0; i < 25; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        particle.style.setProperty('--x', `${(Math.random() - 0.5) * 300}px`);
-        particle.style.setProperty('--y', `${(Math.random() - 0.5) * 300}px`);
-        document.body.appendChild(particle);
-        setTimeout(() => particle.remove(), 700);
+      if (response === correctAnswer) {
+        feedback.textContent = "Correct!";
+        feedback.style.color = "lightgreen";
+        correct++;
+        popCorrect.currentTime = 0;
+        popCorrect.play().catch(() => {});
+      } else {
+        feedback.textContent = "Incorrect!";
+        feedback.style.color = "#ffaaaa";
+        popIncorrect.currentTime = 0;
+        popIncorrect.play().catch(() => {});
       }
-    }
 
-    showQuestion();
+      setTimeout(() => {
+        currentQuestion++;
+        loadQuestion();
+      }, 800);
+    }
   </script>
 </body>
 </html>
